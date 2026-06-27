@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.log
+.git/
+.agents/
+.codex/
+smtp_config.json
+referencia.xlsx
+teste_*.pdf
+server.err
+server.out
+simulador_server.err.log
+simulador_server.out.log

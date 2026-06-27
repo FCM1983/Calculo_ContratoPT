@@ -1,0 +1,1778 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador Salarial Portugal 2026</title>
+  <style>
+    :root {
+      --bg: #eef5f9;
+      --panel: #ffffff;
+      --line: #d8e5ed;
+      --text: #102f45;
+      --muted: #506b7c;
+      --blue: #0a6fae;
+      --blue-dark: #064f82;
+      --orange: #f0b429;
+      --green: #2f7d32;
+      --red: #c75656;
+      --shadow: 0 12px 28px rgba(16, 47, 69, .08), 0 2px 8px rgba(16, 47, 69, .06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: radial-gradient(circle at 30% 0%, #ffffff 0, #f5f9fc 34%, var(--bg) 100%);
+      font: 15px/1.45 "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .shell { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+    aside {
+      background: rgba(255, 255, 255, .64);
+      border-right: 1px solid #d7e5ee;
+      padding: 24px 20px 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .profile {
+      display: grid;
+      justify-items: center;
+      text-align: center;
+      background: linear-gradient(155deg, #1789d1 0%, #07507e 100%);
+      border: 1px solid rgba(255, 255, 255, .38);
+      border-radius: 10px;
+      box-shadow: none;
+      margin: 0 0 28px;
+      padding: 28px 18px 26px;
+      min-height: 312px;
+      color: #fff;
+      text-decoration: none;
+      transition: transform .18s ease, filter .18s ease;
+    }
+    .profile:hover { transform: translateY(-2px); filter: brightness(1.04); }
+    .profile-avatar {
+      position: relative;
+      width: 116px;
+      height: 116px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .88);
+      color: var(--blue-dark);
+      text-decoration: none;
+      font-size: 34px;
+      font-weight: 900;
+      overflow: hidden;
+      box-shadow: none;
+    }
+    .profile-avatar img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile strong {
+      display: block;
+      color: #fff;
+      font-size: 23px;
+      line-height: 1.2;
+    }
+    .profile-line {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .profile span {
+      display: inline-block;
+      color: rgba(255, 255, 255, .92);
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.32;
+    }
+    .profile .linkedin-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 0;
+      background: transparent;
+      text-decoration: none;
+    }
+    .profile .linkedin-link:hover { background: transparent; color: rgba(255, 255, 255, .86); }
+    .profile .linkedin-link svg { width: 30px; height: 30px; fill: currentColor; }
+    .nav {
+      width: 100%;
+      min-height: 56px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #17384d;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      margin: 8px 0;
+      cursor: pointer;
+      font-weight: 800;
+      text-align: left;
+    }
+    .nav.active {
+      background: #fff;
+      border-left: 7px solid var(--blue);
+      border-color: #e0ebf2;
+      color: var(--blue-dark);
+      box-shadow: none;
+    }
+    .nav svg { width: 21px; height: 21px; stroke-width: 2; }
+    .gap { height: 42px; border-top: 1px solid var(--line); margin-top: 26px; padding-top: 26px; }
+    main { padding: 30px 54px 34px; max-width: 1640px; }
+    h1 { font-size: 48px; line-height: 1; margin: 0 0 20px; letter-spacing: 0; }
+    h2 { margin: 0 0 16px; font-size: 18px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 8px 18px;
+      border-radius: 3px;
+      color: #fff;
+      background: linear-gradient(#f8ca54, #d99113);
+      border: 1px solid #b9770e;
+      font-weight: 700;
+      margin-bottom: 42px;
+    }
+    .view { display: none; }
+    .view.active { display: block; }
+    .grid { display: grid; grid-template-columns: minmax(420px, .72fr) minmax(560px, 1.28fr); gap: 18px; align-items: start; }
+    .freelancer-grid { align-items: stretch; }
+    .freelancer-params { height: 100%; display: flex; flex-direction: column; }
+    .freelancer-fields { gap: 14px 18px; }
+    .freelancer-fields .field { margin-bottom: 0; }
+    .freelancer-switches {
+      display: grid;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 18px;
+    }
+    .freelancer-switches .toggle-row { border-bottom-color: rgba(157, 178, 192, .45); }
+    .freelancer-switches .toggle-row:last-child { border-bottom: 0; }
+    .action-button {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(#f8ca54, #d99113);
+      color: #fff;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    .action-button:hover { filter: brightness(1.03); }
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .print-button { background: linear-gradient(#2996ce, #0a6fae); }
+    .autonomous-tax-editor { grid-column: 1 / -1; display: grid; gap: 8px; }
+    .mini-table th, .mini-table td { padding: 5px 6px; font-size: 11px; }
+    .mini-table select, .mini-table input { height: 28px; font-size: 11px; }
+    .mini-button {
+      border: 1px solid #7da9c4;
+      background: #f7fbfd;
+      color: var(--blue-dark);
+      font-weight: 800;
+      height: 30px;
+      cursor: pointer;
+    }
+    .stack { display: grid; gap: 24px; }
+    .panel, .kpi {
+      background: rgba(255, 255, 255, .84);
+      border: 1px solid rgba(203, 219, 229, .92);
+      border-radius: 10px;
+      box-shadow: none;
+    }
+    .panel { padding: 22px 24px; }
+    .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .kpi { min-height: 118px; padding: 24px; display: grid; align-content: center; gap: 7px; }
+    .kpi.icon-kpi { grid-template-columns: 70px 1fr; align-items: center; align-content: stretch; gap: 22px; }
+    .kpi-icon {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(16, 47, 69, .16);
+    }
+    .kpi-icon svg { width: 34px; height: 34px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .kpi-wallet { background: linear-gradient(145deg, #1591d3, #07507e); }
+    .kpi-tax { background: linear-gradient(145deg, #2dc7a4, #0d8c72); }
+    .kpi-company { background: linear-gradient(145deg, #8b69d6, #5d43a8); }
+    .kpi-content { display: grid; gap: 4px; }
+    .kpi label { color: #53616b; font-weight: 800; }
+    .kpi .row { display: grid; gap: 2px; }
+    .value { color: var(--blue-dark); font-size: 25px; font-weight: 900; }
+    .subvalue { color: #6b7780; font-size: 13px; font-weight: 800; }
+    #freelancer .kpis { grid-template-columns: 1fr 1fr; }
+    .field-grid { display: grid; grid-template-columns: 1fr 112px; gap: 12px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: grid; gap: 7px; margin-bottom: 13px; }
+    label { color: #5d6b75; font-size: 13px; font-weight: 700; }
+    .benefits-panel { padding-bottom: 28px; }
+    .benefit-toggles {
+      display: grid;
+      gap: 8px;
+      margin: 2px 0 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(157, 178, 192, .55);
+    }
+    .benefit-toggles .toggle-row {
+      height: 34px;
+      border-bottom: 0;
+    }
+    .benefit-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 18px;
+      align-items: end;
+    }
+    .benefit-fields .field { margin-bottom: 0; }
+    input, select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #cddade;
+      border-radius: 2px;
+      background: #fffdf3;
+      color: var(--text);
+      padding: 0 12px;
+      font: inherit;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #0a6fae; box-shadow: 0 0 0 2px rgba(10, 111, 174, .22); }
+    .table-input {
+      height: 32px;
+      min-width: 108px;
+      text-align: right;
+      font-weight: 700;
+    }
+    .toggle-row {
+      height: 38px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(219, 229, 232, .7);
+      color: #687681;
+      font-weight: 650;
+    }
+    .toggle-row.no-line { border-bottom: 0; }
+    .switch { position: relative; width: 44px; height: 24px; }
+    .switch input { position: absolute; inset: 0; opacity: 0; }
+    .slider { position: absolute; inset: 0; background: #9fb2bf; border-radius: 999px; cursor: pointer; }
+    .slider:before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 3px;
+      left: 3px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
+      transition: transform .18s ease;
+    }
+    .switch input:checked + .slider { background: var(--blue-dark); }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 2px; background: #fff; border: 1px solid #9db2c0; }
+    th, td { border: 1px solid #c6d4dc; padding: 9px 11px; text-align: right; white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: #17384d; background: linear-gradient(#dcebf5, #c0d6e6); font-size: 12px; }
+    tr:last-child td { border-bottom: 0; }
+    .bracket-table { table-layout: fixed; }
+    .bracket-table th, .bracket-table td {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      padding: 8px 9px;
+      font-size: 13px;
+      line-height: 1.25;
+      vertical-align: middle;
+    }
+    .bracket-table th:nth-child(1), .bracket-table td:nth-child(1) { width: 25%; }
+    .bracket-table th:nth-child(2), .bracket-table td:nth-child(2) { width: 14%; }
+    .bracket-table th:nth-child(3), .bracket-table td:nth-child(3) { width: 31%; }
+    .bracket-table th:nth-child(4), .bracket-table td:nth-child(4) { width: 15%; }
+    .bracket-table th:nth-child(5), .bracket-table td:nth-child(5) { width: 15%; }
+    .detail-deduction td, .detail-deduction .money-cell { color: #b42318; font-weight: 800; }
+    .detail-subtotal td { background: #eef5f9; font-weight: 800; }
+    .detail-result td { background: #dcebf5; color: #064f82; font-weight: 900; }
+    .simulation-start td { border-top: 3px solid #7da9c4; background: #f7fbfd; }
+    .simulation-month td { background: #fbfdff; border-bottom: 2px solid #b7cad6; }
+    .money-cell { text-align: right; }
+    .positive { color: var(--green); font-weight: 800; }
+    .negative { color: var(--red); font-weight: 800; }
+    .formula-box { display: grid; gap: 8px; }
+    .formula-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      color: #17384d;
+      font-weight: 800;
+    }
+    .formula-line span:last-child { text-align: right; color: var(--blue-dark); }
+    .notice {
+      color: #4f6473;
+      font-size: 13px;
+      line-height: 1.45;
+      background: #f7fbfd;
+      border-left: 4px solid var(--orange);
+    }
+    .manual-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .manual-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #314d60;
+    }
+    .manual-list li { margin: 8px 0; }
+    .manual-list strong { color: var(--text); }
+    .chart { display: grid; gap: 12px; }
+    .pie-layout { display: grid; grid-template-columns: 240px 1fr; gap: 22px; align-items: center; }
+    .pie-canvas { width: 220px; height: 220px; max-width: 100%; }
+    .pie-legend { display: grid; gap: 10px; }
+    .pie-item { display: grid; grid-template-columns: 14px 1fr auto auto; gap: 10px; align-items: center; font-weight: 700; }
+    .pie-dot { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(0, 0, 0, .14); }
+    .pie-value { color: #17384d; text-align: right; }
+    .pie-percent { color: var(--muted); min-width: 54px; text-align: right; }
+    .bar-row { display: grid; grid-template-columns: 92px 1fr 105px; gap: 12px; align-items: center; }
+    .bar-track { height: 12px; border-radius: 2px; background: #c7d6df; overflow: hidden; border: 1px solid #9db2c0; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, #0a6fae, #58a9d8); border-radius: inherit; min-width: 2px; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 14px; }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; padding: 14px; display: flex; gap: 8px; overflow-x: auto; }
+      .profile { flex: 0 0 220px; margin: 0 8px 0 0; min-height: 78px; padding: 10px 12px; }
+      .nav { flex: 0 0 auto; width: auto; }
+      .gap { display: none; }
+      main { padding: 30px 18px; }
+      h1 { font-size: 40px; }
+      .grid, .kpis, .two, .field-grid { grid-template-columns: 1fr; }
+      .manual-grid { grid-template-columns: 1fr; }
+      .benefit-fields { grid-template-columns: 1fr; }
+      .pie-layout { grid-template-columns: 1fr; justify-items: center; }
+      .pie-legend { width: 100%; }
+      .panel { padding: 18px; }
+      table { display: block; overflow-x: auto; }
+    }
+    @media print {
+      @page { size: A4 landscape; margin: 4mm 4mm 9mm; }
+      html, body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: #fff;
+        width: 100%;
+      }
+      a[href]::after {
+        content: none !important;
+      }
+      .shell {
+        display: block;
+        min-height: 0;
+      }
+      aside {
+        display: none !important;
+      }
+      main {
+        max-width: none;
+        width: 100%;
+        padding: 0;
+        zoom: 1;
+      }
+      .view {
+        display: none !important;
+      }
+      .view.active {
+        display: block !important;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0 0 8px;
+      }
+      h2 {
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .pill {
+        min-height: 24px;
+        padding: 4px 10px;
+        margin-bottom: 12px;
+        font-size: 12px;
+      }
+      .grid {
+        grid-template-columns: minmax(360px, .95fr) minmax(520px, 1.05fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .stack {
+        gap: 10px;
+      }
+      .panel {
+        padding: 10px;
+        box-shadow: none;
+        break-inside: avoid;
+      }
+      .kpis {
+        gap: 10px;
+      }
+      .kpi {
+        min-height: 66px;
+        padding: 10px 12px;
+        box-shadow: none;
+      }
+      .kpi label,
+      label {
+        font-size: 10px;
+      }
+      .value {
+        font-size: 19px;
+      }
+      .subvalue {
+        font-size: 16px;
+      }
+      .field {
+        gap: 3px;
+        margin-bottom: 6px;
+      }
+      input,
+      select {
+        height: 28px;
+        padding: 0 7px;
+        font-size: 11px;
+      }
+      .toggle-row {
+        height: 25px;
+        font-size: 11px;
+      }
+      .switch {
+        width: 34px;
+        height: 19px;
+      }
+      .slider:before {
+        width: 15px;
+        height: 15px;
+        top: 2px;
+        left: 2px;
+      }
+      .switch input:checked + .slider:before {
+        transform: translateX(15px);
+      }
+      th,
+      td {
+        padding: 4px 5px;
+        font-size: 9px;
+        line-height: 1.18;
+      }
+      th {
+        font-size: 9px;
+      }
+      .table-input {
+        height: 22px;
+        min-width: 72px;
+        font-size: 9px;
+      }
+      .benefit-toggles {
+        gap: 3px;
+        margin-bottom: 8px;
+        padding-bottom: 7px;
+      }
+      .benefit-fields,
+      .freelancer-fields {
+        gap: 7px 9px;
+      }
+      .freelancer-switches {
+        gap: 3px;
+        padding-top: 8px;
+      }
+      #freelancer.view.active {
+        zoom: 1;
+      }
+      #freelancer h1 {
+        font-size: 31px;
+        margin-bottom: 5px;
+      }
+      #freelancer .pill {
+        min-height: 22px;
+        margin-bottom: 9px;
+        padding: 4px 9px;
+        font-size: 11px;
+      }
+      #freelancer .freelancer-grid {
+        grid-template-columns: 225px minmax(0, 1fr);
+        gap: 9px;
+      }
+      #freelancer .stack {
+        gap: 8px;
+      }
+      #freelancer .panel {
+        padding: 7px;
+      }
+      #freelancer h2 {
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      #freelancer .freelancer-fields {
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 7px;
+      }
+      #freelancer .field {
+        gap: 2px;
+        margin-bottom: 0;
+      }
+      #freelancer label,
+      #freelancer .toggle-row {
+        font-size: 10.8px;
+      }
+      #freelancer input,
+      #freelancer select {
+        height: 24px;
+        padding: 0 5px;
+        font-size: 10.8px;
+      }
+      #freelancer .freelancer-switches {
+        gap: 2px;
+        padding-top: 5px;
+      }
+      #freelancer .toggle-row {
+        height: 20px;
+      }
+      #freelancer .switch {
+        width: 28px;
+        height: 16px;
+      }
+      #freelancer .slider:before {
+        width: 12px;
+        height: 12px;
+      }
+      #freelancer .switch input:checked + .slider:before {
+        transform: translateX(12px);
+      }
+      #freelancer .action-row {
+        display: none !important;
+      }
+      #freelancer .mini-button {
+        display: none !important;
+      }
+      #freelancer .kpis {
+        gap: 7px;
+      }
+      #freelancer .kpi {
+        min-height: 52px;
+        padding: 8px 10px;
+      }
+      #freelancer .kpi label {
+        font-size: 10px;
+      }
+      #freelancer .value {
+        font-size: 23px;
+      }
+      #freelancer .subvalue {
+        font-size: 14px;
+      }
+      #freelancer .formula-line {
+        display: grid;
+        grid-template-columns: 86px minmax(0, 1fr);
+        align-items: start;
+        padding: 5px 0;
+        font-size: 11.4px;
+        gap: 10px;
+        border-bottom: 1px solid rgba(157, 178, 192, .45);
+      }
+      #freelancer .formula-line:last-child {
+        border-bottom: 0;
+      }
+      #freelancer .formula-line span:first-child {
+        color: #17384d;
+      }
+      #freelancer .formula-line span:last-child {
+        text-align: left;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.25;
+      }
+      #freelancer table {
+        display: table !important;
+        width: 100%;
+        table-layout: fixed;
+      }
+      #freelancer col:nth-child(1) { width: 7%; }
+      #freelancer col:nth-child(2) { width: 10%; }
+      #freelancer col:nth-child(3) { width: 12%; }
+      #freelancer col:nth-child(4) { width: 11%; }
+      #freelancer col:nth-child(5) { width: 11%; }
+      #freelancer col:nth-child(6) { width: 11%; }
+      #freelancer col:nth-child(7) { width: 12%; }
+      #freelancer col:nth-child(8) { width: 12%; }
+      #freelancer col:nth-child(9) { width: 14%; }
+      #freelancer th,
+      #freelancer td {
+        padding: 4px 4px;
+        font-size: 11.2px;
+        line-height: 1.2;
+        white-space: nowrap;
+        text-align: right;
+      }
+      #freelancer th:first-child,
+      #freelancer td:first-child {
+        text-align: left;
+      }
+      #freelancer .table-input {
+        width: 100%;
+        height: 21px;
+        min-width: 0;
+        font-size: 11px;
+        padding: 0 3px;
+      }
+      #freelancer #freelance_current input,
+      #freelancer #freelance_table input {
+        border: 0;
+        background: transparent;
+        text-align: right;
+        font-weight: 800;
+      }
+      .pie-layout {
+        grid-template-columns: 130px 1fr;
+        gap: 10px;
+      }
+      .pie-canvas {
+        width: 120px !important;
+        height: 120px !important;
+      }
+      .pie-legend {
+        gap: 5px;
+      }
+      .pie-item {
+        grid-template-columns: 10px 1fr auto auto;
+        gap: 6px;
+        font-size: 9px;
+      }
+      .pie-dot {
+        width: 9px;
+        height: 9px;
+      }
+      .hint {
+        font-size: 9px;
+        margin-top: 6px;
+      }
+      .print-hide-empty {
+        display: none !important;
+      }
+      .print-hide-off {
+        display: none !important;
+      }
+      body::after {
+        content: "Desenvolvido por Felipe Manso Consultor SAP LO (MM/SD) - LinkedIn: www.linkedin.com/in/sapfelipemanso";
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding-top: 6px;
+        border-top: 1px solid #8ea6b6;
+        color: #102f45;
+        font-size: 10px;
+        text-align: center;
+        background: #fff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <a class="profile" href="https://www.linkedin.com/in/sapfelipemanso/?locale=pt&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BoAO8Wb3wRx2mmrrBc34zVw%3D%3D" target="_blank" rel="noopener" aria-label="Abrir perfil LinkedIn Felipe Manso">
+        <div class="profile-avatar">
+          <span>FM</span>
+          <img src="https://media.licdn.com/dms/image/v2/D4E03AQHNX3JhXxRAwg/profile-displayphoto-scale_400_400/B4EZ3p3_XAIcAk-/0/1777745267995?e=1784160000&v=beta&t=THiZzTZEb1NCXbrhBS4UE2nYVXWyEjIPCxzsf-1NHrI" alt="Foto de Felipe Manso" onerror="this.hidden=true">
+        </div>
+        <strong>Felipe Manso</strong>
+        <div class="profile-line">
+          <span>Consultor SAP LO (MM/SD)</span>
+          <span class="linkedin-link" aria-label="LinkedIn Felipe Manso" title="LinkedIn Felipe Manso">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12Zm1.78 13.02H3.56V9h3.56v11.45ZM22.22 0H1.77C.8 0 0 .77 0 1.72v20.56C0 23.23.8 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z"/></svg>
+          </span>
+        </div>
+      </a>
+      <button class="nav active" data-view="dashboard"><span data-icon="calc"></span>Cálculo Contrato</button>
+      <button class="nav" data-view="compare"><span data-icon="compare"></span>Simulações Contrato</button>
+      <div class="gap"></div>
+      <button class="nav" data-view="freelancer"><span data-icon="briefcase"></span>Freelancer vs Contrato</button>
+      <button class="nav" data-view="params"><span data-icon="settings"></span>Parâmetros</button>
+      <button class="nav" data-view="instructions"><span data-icon="help"></span>Instruções</button>
+    </aside>
+    <main>
+      <section id="dashboard" class="view active">
+        <h1>Cálculo Contrato</h1>
+        <div class="pill">Analisar salário, impostos, benefícios e contrato</div>
+        <div class="grid">
+          <div class="stack">
+            <div class="panel">
+              <h2>Dados do Contrato</h2>
+              <div class="field-grid">
+                <div class="field"><input id="gross_monthly" type="text" inputmode="decimal" data-decimal data-model placeholder="Salário bruto mensal (€)"></div>
+                <div class="field"><select><option>Efetivo</option><option>Termo</option><option>Prestador</option></select></div>
+              </div>
+              <div class="field"><select id="marital_status" data-model><option>Solteiro</option><option>Casado 1 titular</option><option>Casado 2 titulares</option></select></div>
+              <div class="two">
+                <div class="field"><label>N.º salários</label><input id="salary_count" type="number" min="1" step="1" data-model></div>
+                <div class="field"><label>Dependentes</label><input id="dependents" type="number" min="0" step="1" data-model></div>
+              </div>
+            </div>
+            <div class="panel benefits-panel">
+              <h2>Deduções e Benefícios</h2>
+              <div class="benefit-toggles">
+                <div class="toggle-row">Subsídio de Alimentação <label class="switch"><input id="meal_enabled" checked type="checkbox"><span class="slider"></span></label></div>
+                <div class="toggle-row">Pagamento em dinheiro <label class="switch"><input id="other_exempt_cash" data-model type="checkbox"><span class="slider"></span></label></div>
+              </div>
+              <div class="benefit-fields">
+                <div class="field"><label>Subsídio diário (€)</label><input id="meal_allowance" type="text" inputmode="decimal" data-decimal data-model></div>
+                <div class="field"><label>Dias/mês</label><input id="meal_days_month" type="number" min="0" step="1" data-model></div>
+                <div class="field"><label>Meses</label><input id="meal_months" type="number" min="0" step="1" data-model></div>
+                <div class="field"><label>Limite isento diário (€)</label><input id="meal_exempt_daily" data-model type="text" inputmode="decimal" data-decimal></div>
+              </div>
+            </div>
+            <div class="panel calculation-params-panel">
+              <h2>Parâmetros do Cálculo</h2>
+              <div class="two">
+                <div class="field"><label>Outros rendimentos tributáveis (€)</label><input id="other_taxable_income" data-model type="text" inputmode="decimal" data-decimal></div>
+                <div class="field"><label>Outros rendimentos isentos (€)</label><input id="other_exempt_income" data-model type="text" inputmode="decimal" data-decimal></div>
+                <div class="field"><label>Despesas (€)</label><input id="expenses_monthly" data-model type="text" inputmode="decimal" data-decimal></div>
+              </div>
+              <div class="toggle-row no-line">IRS Jovem <label class="switch"><input id="irs_young" data-model type="checkbox"><span class="slider"></span></label></div>
+              <div class="field"><label>Ano IRS Jovem</label><input id="irs_young_year" data-model type="number" min="0" max="5" step="1"></div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="kpis">
+              <div class="kpi icon-kpi">
+                <span class="kpi-icon kpi-wallet"><svg viewBox="0 0 24 24"><path d="M4 7h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2h13"/><path d="M16 12h5v4h-5a2 2 0 0 1 0-4Z"/></svg></span>
+                <div class="kpi-content"><label>Salário Líquido Mensal</label><div class="row"><span class="value" data-out="contract.net_month"></span><span class="subvalue" id="contract_net_year_label"></span></div></div>
+              </div>
+              <div class="kpi icon-kpi">
+                <span class="kpi-icon kpi-tax"><svg viewBox="0 0 24 24"><path d="m19 5-14 14"/><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/></svg></span>
+                <div class="kpi-content"><label>Impostos e Contribuições</label><div class="row"><span class="value" id="tax_total_month"></span><span class="subvalue" id="tax_total_year"></span></div></div>
+              </div>
+              <div class="kpi icon-kpi">
+                <span class="kpi-icon kpi-company"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></span>
+                <div class="kpi-content"><label>Custo Total da Empresa</label><div class="row"><span class="value" data-out="contract.total_received"></span><span class="subvalue">anual</span></div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <h2>Detalhes de Cálculo</h2>
+              <table><thead><tr><th>Item</th><th>Fórmula</th><th>Anual (€)</th><th>Mensal (€)</th><th>%</th></tr></thead><tbody id="details"></tbody></table>
+            </div>
+            <div class="panel">
+              <h2>Distribuição Mensal</h2>
+              <div class="pie-layout">
+                <canvas id="contract_cost_pie" class="pie-canvas" width="220" height="220" aria-label="Gráfico de pizza dos valores mensais"></canvas>
+                <div id="contract_cost_legend" class="pie-legend"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="compare" class="view">
+        <h1>Simulações Contrato</h1>
+        <div class="pill">Cenários de contrato com a mesma lógica fiscal</div>
+        <div class="panel">
+          <table><thead><tr><th>Cenário</th><th>Bruto/mês</th><th>Bruto anual</th><th>SS anual</th><th>SS mensal</th><th>IRS anual</th><th>IRS mensal</th><th>Líquido anual</th><th>Líquido/mês</th></tr></thead><tbody id="scenario_table"></tbody></table>
+        </div>
+      </section>
+
+      <section id="freelancer" class="view">
+        <h1>Freelancer vs Contrato</h1>
+        <div class="pill">Recibos verdes, IVA, IRS Cat. B e Segurança Social TI</div>
+        <div class="grid freelancer-grid">
+          <div class="panel freelancer-params">
+            <h2>Parâmetros Freelancer</h2>
+            <div class="two freelancer-fields">
+              <div class="field"><label>Taxa dia (€)</label><input id="freelance_day_rate" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Base dos dias faturáveis</label><select id="freelance_days_mode" data-model><option value="manual">Informar dias</option><option value="next12">Próximos 12 meses</option></select></div>
+              <div class="field"><label id="freelance_days_label">Dias faturáveis/mês</label><input id="freelance_days_month" data-model type="number" step="1"></div>
+              <div class="field"><label>Salário Funcionário/mês (€)</label><input id="employee_salary_monthly" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>N.º salários funcionário</label><input id="employee_salary_count" data-model type="number" min="1" step="1"></div>
+              <div class="field"><label>Situação IRS</label><select id="employee_marital_status" data-model><option>Solteiro</option><option>Casado 1 titular</option><option>Casado 2 titulares</option></select></div>
+              <div class="field"><label>Dependentes IRS</label><input id="employee_dependents" data-model type="number" min="0" step="1"></div>
+              <div class="field"><label>Coeficiente IRS Cat. B</label><input id="freelance_irs_coefficient" data-model type="number" step="0.01"></div>
+              <div class="field"><label>IRC Empresa</label><input id="company_irc_rate" data-model type="number" step="0.01"></div>
+              <div class="field"><label>IVA</label><input id="vat_rate" data-model type="number" step="0.01"></div>
+              <div class="field"><label>Telefone x Internet (€)</label><input id="expense_phone_internet" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Energia (€)</label><input id="expense_energy" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Contabilista (€)</label><input id="expense_accountant" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Plano Saúde (€)</label><input id="expense_health_plan" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Outras despesas (€)</label><input id="expense_other_company" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Despesa isenta (€)</label><input id="exempt_company_expense" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="autonomous-tax-editor">
+                <label>Tributação autónoma</label>
+                <table class="mini-table"><thead><tr><th>Tipo</th><th>Valor/mês</th><th>%</th><th></th></tr></thead><tbody id="autonomous_tax_table"></tbody></table>
+                <button class="mini-button" id="add_autonomous_tax" type="button">Adicionar incidência</button>
+              </div>
+            </div>
+            <div class="freelancer-switches">
+            <div class="toggle-row">IVA incluído na taxa dia <label class="switch"><input id="vat_included" data-model type="checkbox"><span class="slider"></span></label></div>
+            <div class="toggle-row">Isento IVA Art. 53 <label class="switch"><input id="vat_exempt" data-model type="checkbox"><span class="slider"></span></label></div>
+            <div class="toggle-row">Isenção SS no primeiro ano <label class="switch"><input id="freelance_ss_exempt" data-model type="checkbox"><span class="slider"></span></label></div>
+            <div class="toggle-row">Agravamento por prejuízo fiscal <label class="switch"><input id="autonomous_tax_loss_uplift" data-model type="checkbox"><span class="slider"></span></label></div>
+            <div class="action-row">
+              <button class="action-button print-button" id="print_screen_button" type="button">Imprimir</button>
+              <button class="action-button" id="send_email_button" type="button">Enviar por e-mail</button>
+            </div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="kpis">
+              <div class="kpi"><label>Líquido Freelancer/mês</label><div class="row"><span class="value" data-out="freelancer.net_month"></span><span class="subvalue" data-out="freelancer.difference_month" data-signed="1"></span></div></div>
+              <div class="kpi"><label>Líquido anual Freelancer</label><div class="row"><span class="value" data-out="freelancer.net_year"></span><span class="subvalue" data-percent="freelancer.effective_rate"></span></div></div>
+            </div>
+            <div class="panel formula-box">
+              <h2>Cálculo da Diferença</h2>
+              <div class="formula-line"><span>Mensal</span><span id="difference_formula_month"></span></div>
+              <div class="formula-line"><span>Anual</span><span id="difference_formula_year"></span></div>
+              <div class="formula-line"><span>Base IRC Empresa</span><span id="company_irc_formula"></span></div>
+            </div>
+            <div class="panel">
+              <h2>Taxa dia informada</h2>
+              <table><colgroup><col><col><col><col><col><col><col><col><col></colgroup><thead><tr><th>Período</th><th>Taxa dia</th><th>Receita</th><th>IVA</th><th>SS</th><th>IRS</th><th>IRC Empresa</th><th>Líquido</th><th>Diferença</th></tr></thead><tbody id="freelance_current"></tbody></table>
+            </div>
+            <div class="panel">
+              <h2>Tabela rápida por taxa dia</h2>
+              <table><colgroup><col><col><col><col><col><col><col><col><col></colgroup><thead><tr><th>Período</th><th>Taxa dia</th><th>Receita</th><th>IVA</th><th>SS</th><th>IRS</th><th>IRC Empresa</th><th>Líquido</th><th>Diferença</th></tr></thead><tbody id="freelance_table"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="params" class="view">
+        <h1>Parâmetros</h1>
+        <div class="pill">Valores base importados da planilha</div>
+        <div class="grid">
+          <div class="panel">
+            <h2>Modelo</h2>
+            <div class="two">
+              <div class="field"><label>SS trabalhador</label><input id="ss_rate_employee" data-model type="number" step="0.001"></div>
+              <div class="field"><label>Dedução específica Cat. A (€)</label><input id="specific_deduction" data-model type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>SS TI</label><input id="freelance_ss_rate" data-model type="number" step="0.001"></div>
+              <div class="field"><label>Rendimento relevante SS TI</label><input id="freelance_ss_relevant_rate" data-model type="number" step="0.01"></div>
+              <div class="field"><label>Outras deduções (€)</label><input data-alias="other_deductions" type="text" inputmode="decimal" data-decimal></div>
+              <div class="field"><label>Ajustes freelancer (€)</label><input id="freelance_adjustments" data-model type="text" inputmode="decimal" data-decimal></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Escalões IRS 2026 - Retenção mensal</h2>
+            <table class="bracket-table"><thead><tr><th>Remuneração mensal</th><th>Taxa marginal</th><th>Parcela a abater</th><th>Por dependente</th><th>Taxa efetiva</th></tr></thead><tbody id="bracket_table"></tbody></table>
+          </div>
+        </div>
+        <p class="hint">Modelo estimativo. Não substitui simulação oficial da Autoridade Tributária nem aconselhamento fiscal.</p>
+      </section>
+
+      <section id="instructions" class="view">
+        <h1>Instruções</h1>
+        <div class="pill">Manual do utilizador para preenchimento e leitura dos cálculos</div>
+        <div class="manual-grid">
+          <div class="panel">
+            <h2>Cálculo Contrato</h2>
+            <ul class="manual-list">
+              <li><strong>Salário bruto mensal:</strong> informe o valor bruto mensal do contrato de trabalho.</li>
+              <li><strong>Tipo de contrato:</strong> campo informativo para classificar o vínculo apresentado.</li>
+              <li><strong>Estado civil:</strong> selecione Solteiro, Casado 1 titular ou Casado 2 titulares; a opção afeta a retenção mensal de IRS.</li>
+              <li><strong>N.º salários:</strong> indique a quantidade de salários pagos no ano, normalmente 12 ou 14.</li>
+              <li><strong>Dependentes:</strong> informe a quantidade de dependentes considerada para retenção e deduções.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Deduções e Benefícios</h2>
+            <ul class="manual-list">
+              <li><strong>Subsídio de Alimentação:</strong> ativa ou desativa o subsídio no cálculo.</li>
+              <li><strong>Pagamento em dinheiro:</strong> quando ligado, o subsídio soma ao líquido recebido; quando desligado, apenas eventual parte tributável afeta IRS.</li>
+              <li><strong>Subsídio diário:</strong> valor diário pago de alimentação.</li>
+              <li><strong>Dias/mês:</strong> quantidade de dias considerados para o subsídio em cada mês.</li>
+              <li><strong>Meses:</strong> quantidade de meses em que o subsídio é pago.</li>
+              <li><strong>Limite isento diário:</strong> limite diário não tributável aplicado ao subsídio de alimentação.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Parâmetros do Cálculo</h2>
+            <ul class="manual-list">
+              <li><strong>Outros rendimentos tributáveis:</strong> valores adicionais que entram na base de IRS.</li>
+              <li><strong>Outros rendimentos isentos:</strong> valores que somam ao líquido, mas não compõem base de IRS ou Segurança Social.</li>
+              <li><strong>Despesas:</strong> valor mensal abatido diretamente ao salário líquido.</li>
+              <li><strong>IRS Jovem:</strong> ativa o regime estimativo de isenção parcial quando aplicável.</li>
+              <li><strong>Ano IRS Jovem:</strong> informe o ano do benefício considerado no cálculo.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Simulações Contrato</h2>
+            <ul class="manual-list">
+              <li><strong>Bruto/mês:</strong> altere os valores dos cenários para comparar salários contratuais.</li>
+              <li><strong>SS anual e mensal:</strong> representam a Segurança Social estimada com base no salário informado.</li>
+              <li><strong>IRS anual e mensal:</strong> representam a retenção estimada conforme estado civil, dependentes e demais parâmetros do contrato.</li>
+              <li><strong>Líquido anual e mensal:</strong> resultado líquido estimado para cada cenário.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Freelancer vs Contrato</h2>
+            <ul class="manual-list">
+              <li><strong>Taxa dia:</strong> valor cobrado por dia de trabalho freelancer.</li>
+              <li><strong>Base dos dias faturáveis:</strong> escolha entre Informar dias ou Próximos 12 meses. Em Informar dias, o valor digitado é tratado como dias faturáveis por mês e multiplicado por 12. Em Próximos 12 meses, o sistema soma os dias úteis nacionais de Portugal dos próximos 12 meses, excluindo fins de semana e feriados nacionais.</li>
+              <li><strong>Salário Funcionário/mês:</strong> quando preenchido, SS e IRS consideram este salário; a diferença soma o líquido do freelancer e o líquido do funcionário.</li>
+              <li><strong>N.º salários funcionário:</strong> quantidade anual de salários para o funcionário informado.</li>
+              <li><strong>Situação IRS e Dependentes IRS:</strong> parâmetros usados no cálculo do IRS da simulação freelancer.</li>
+              <li><strong>Coeficiente IRS Cat. B:</strong> percentual da receita usado para apurar a base tributável quando não há salário de funcionário.</li>
+              <li><strong>IRC Empresa:</strong> taxa aplicada sobre a base estimada de IRC, calculada pela receita sem IVA menos despesas informadas e salário funcionário quando preenchido. Nas tabelas, a coluna IRC Empresa apresenta o IRC estimado acrescido da tributação autónoma quando houver.</li>
+              <li><strong>Telefone x Internet:</strong> informe o custo mensal estimado com comunicações e acesso à internet da atividade.</li>
+              <li><strong>Energia:</strong> informe o custo mensal estimado com eletricidade ou outros consumos energéticos associados à atividade.</li>
+              <li><strong>Contabilista:</strong> informe o honorário mensal do contabilista ou serviço de contabilidade.</li>
+              <li><strong>Plano Saúde:</strong> informe o custo mensal do plano de saúde quando considerado como despesa da estrutura.</li>
+              <li><strong>Outras despesas:</strong> informe demais custos mensais recorrentes não cobertos pelos campos anteriores.</li>
+              <li><strong>Tributação autónoma:</strong> adicione uma ou mais linhas de incidência, selecione a categoria fiscal aplicável e informe o valor mensal sujeito. O sistema aplica automaticamente a taxa legal da categoria selecionada, anualiza o valor por 12 meses e soma o imposto apurado ao custo fiscal apresentado em IRC Empresa.</li>
+              <li><strong>Valor/mês da tributação autónoma:</strong> informe apenas a base mensal sujeita à incidência selecionada. Estes valores não geram IVA, entram como despesa operacional e também servem de base para o cálculo da tributação autónoma.</li>
+              <li><strong>Agravamento por prejuízo fiscal:</strong> quando ligado, acrescenta 10 pontos percentuais à taxa de tributação autónoma selecionada, simulando o agravamento aplicável em caso de prejuízo fiscal quando previsto.</li>
+              <li><strong>Despesa isenta:</strong> informe despesas mensais que não devem sofrer incidência de IVA nem tributação autónoma. O valor é anualizado por 12 meses e tratado como despesa operacional, reduzindo o líquido freelancer e a base estimada de IRC Empresa.</li>
+              <li><strong>Tratamento das despesas:</strong> as despesas sujeitas e isentas são anualizadas por 12 meses. As despesas reduzem a base estimada de IRC Empresa e o líquido freelancer. A tributação autónoma é calculada separadamente apenas sobre as despesas sujeitas e depois somada ao valor de IRC Empresa.</li>
+              <li><strong>Leitura da coluna IRC Empresa:</strong> representa IRC estimado sobre a base operacional mais a tributação autónoma. Este é um cálculo simplificado para simulação e não substitui apuramento contabilístico/fiscal completo.</li>
+              <li><strong>IVA:</strong> taxa de IVA usada para separar ou acrescer o imposto conforme os botões de IVA.</li>
+              <li><strong>Imprimir:</strong> abre a impressão da página atual, usando o layout horizontal compacto definido para impressão.</li>
+              <li><strong>Enviar por e-mail:</strong> solicita o endereço do destinatário, gera automaticamente o PDF da página e envia o e-mail com o PDF anexado, usando a configuração SMTP do servidor local.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h2>Parâmetros</h2>
+            <ul class="manual-list">
+              <li><strong>SS trabalhador:</strong> taxa de Segurança Social aplicada ao trabalhador dependente.</li>
+              <li><strong>Dedução específica Cat. A:</strong> dedução usada para apurar o rendimento coletável.</li>
+              <li><strong>SS TI:</strong> taxa de Segurança Social para trabalhador independente.</li>
+              <li><strong>Rendimento relevante SS TI:</strong> percentual da receita considerado para Segurança Social de independente.</li>
+              <li><strong>Outras deduções:</strong> deduções adicionais usadas no apuramento fiscal.</li>
+              <li><strong>Ajustes freelancer:</strong> valores abatidos à base tributável do freelancer.</li>
+              <li><strong>Escalões IRS:</strong> tabela informativa da retenção mensal usada pelo simulador.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="hint">Os resultados são estimativas para apoio à decisão e devem ser confirmados com contabilista, Autoridade Tributária ou simuladores oficiais quando houver impacto fiscal efetivo.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const IAS_2026 = 537.13;
+    const SPECIFIC_DEDUCTION_CAT_A = Math.round(8.54 * IAS_2026 * 100) / 100;
+    const DEPENDENT_TAX_CREDIT = 600;
+    const IRS_YOUNG_CAP = Math.round(55 * IAS_2026 * 100) / 100;
+    const brackets = [[0,8342,.125],[8342,12587,.157],[12587,17838,.212],[17838,23089,.241],[23089,29397,.311],[29397,43090,.349],[43090,46566,.431],[46566,86634,.446],[86634,999999999,.48]];
+    const withholdingTable = [
+      {label:"até 920€", upper:920, rate:0, abatement:"0", dep:0, effective:"0%"},
+      {label:"de 920€ até 1.042€", upper:1042, rate:.125, abatement:"12,50% x 2,6 x (1.273,85 - R)", dep:21.43, effective:"5,3%"},
+      {label:"de 1.042€ até 1.108€", upper:1108, rate:.157, abatement:"15,70% x 1,35 x (1.554,83 - R)", dep:21.43, effective:"7,2%"},
+      {label:"de 1.108€ até 1.154€", upper:1154, rate:.157, abatement:"94,71", dep:21.43, effective:"7,5%"},
+      {label:"de 1.154€ até 1.212€", upper:1212, rate:.212, abatement:"158,18", dep:21.43, effective:"8,1%"},
+      {label:"de 1.212€ até 1.819€", upper:1819, rate:.241, abatement:"193,33", dep:21.43, effective:"13,5%"},
+      {label:"de 1.819€ até 2.119€", upper:2119, rate:.311, abatement:"320,66", dep:21.43, effective:"16%"},
+      {label:"de 2.119€ até 2.499€", upper:2499, rate:.349, abatement:"401,19", dep:21.43, effective:"18,8%"},
+      {label:"de 2.499€ até 3.305€", upper:3305, rate:.3836, abatement:"487,66", dep:21.43, effective:"23,6%"},
+      {label:"de 3.305€ até 5.547€", upper:5547, rate:.3969, abatement:"531,62", dep:21.43, effective:"30,1%"},
+      {label:"de 5.547€ até 20.221€", upper:20221, rate:.4495, abatement:"823,40", dep:21.43, effective:"40,9%"},
+      {label:"mais de 20.221€", upper:999999999, rate:.4717, abatement:"1.272,31", dep:21.43, effective:"n.a."}
+    ];
+    const cloneWithholdingTable = () => withholdingTable.map(row => ({...row}));
+    const singleWithholdingTable = cloneWithholdingTable();
+    const marriedOneHolderWithholdingTable = cloneWithholdingTable();
+    singleWithholdingTable[5] = {...singleWithholdingTable[5], abatement:"219,05"};
+    marriedOneHolderWithholdingTable[5] = {...marriedOneHolderWithholdingTable[5], rate:.157, abatement:"184,18"};
+    const withholdingTableByStatus = status => {
+      const key = String(status || "").trim().toLowerCase();
+      if (key === "casado 1 titular") return marriedOneHolderWithholdingTable;
+      if (key === "solteiro") return singleWithholdingTable;
+      return withholdingTable;
+    };
+    const autonomousTaxOptions = {
+      none: {label: "Sem incidência", rate: 0},
+      representation: {label: "Despesas de representação", rate: .10},
+      allowances: {label: "Ajudas de custo/km não faturadas", rate: .05},
+      undocumented: {label: "Despesas não documentadas", rate: .50},
+      vehicle_low: {label: "Viatura < 37.500€", rate: .085},
+      vehicle_mid: {label: "Viatura 37.500€ a 45.000€", rate: .255},
+      vehicle_high: {label: "Viatura ≥ 45.000€", rate: .325},
+      plugin_low: {label: "Plug-in híbrida < 37.500€", rate: .025},
+      plugin_mid: {label: "Plug-in híbrida 37.500€ a 45.000€", rate: .075},
+      plugin_high: {label: "Plug-in híbrida ≥ 45.000€", rate: .15}
+    };
+    const autonomousTaxOption = type => autonomousTaxOptions[type] || autonomousTaxOptions.none;
+    const autonomousTaxRate = (data, type) => {
+      const baseRate = autonomousTaxOption(type).rate;
+      return baseRate > 0 && data.autonomous_tax_loss_uplift ? baseRate + .10 : baseRate;
+    };
+    const autonomousTaxEntries = data => {
+      const entries = Array.isArray(data.autonomous_tax_entries) ? data.autonomous_tax_entries : [];
+      return entries.length ? entries : [{type: "none", amount: 0}];
+    };
+    const hasAutonomousTaxIncidence = data => autonomousTaxEntries(data).some(entry =>
+      entry.type !== "none" && Math.round(Math.abs(val(entry.amount)) * 100) !== 0
+    );
+    const jovem = {1:[1,IRS_YOUNG_CAP],2:[.75,IRS_YOUNG_CAP],3:[.75,IRS_YOUNG_CAP],4:[.75,IRS_YOUNG_CAP],5:[.5,IRS_YOUNG_CAP],6:[.5,IRS_YOUNG_CAP],7:[.5,IRS_YOUNG_CAP],8:[.25,IRS_YOUNG_CAP],9:[.25,IRS_YOUNG_CAP],10:[.25,IRS_YOUNG_CAP]};
+    const defaults = {
+      gross_monthly: 1500, salary_count: 14, marital_status: "Casado 2 titulares", dependents: 2,
+      meal_allowance: 6.15, meal_days_month: 20, meal_months: 11, meal_exempt_daily: 6.15, irs_young: false,
+      irs_young_year: 0, personal_deductions: 0, other_deductions: 0, other_taxable_income: 0, other_exempt_income: 0, other_exempt_cash: true, expenses_monthly: 0,
+      ss_rate_employee: .11, specific_deduction: SPECIFIC_DEDUCTION_CAT_A, freelance_day_rate: 250,
+      freelance_days_month: 20, freelance_days_mode: "manual", freelance_irs_coefficient: .75,
+      freelance_ss_relevant_rate: .70, freelance_ss_rate: .214, freelance_withholding: .25,
+      company_irc_rate: .20,
+      vat_rate: .23, employee_salary_monthly: 0, employee_salary_count: 14, employee_marital_status: "Casado 2 titulares", employee_dependents: 2, vat_included: false, vat_exempt: false, freelance_ss_exempt: false,
+      freelance_adjustments: 0, expense_phone_internet: 0, expense_energy: 0, expense_accountant: 0, expense_health_plan: 0, expense_other_company: 0,
+      autonomous_tax_entries: [{type: "none", amount: 0}], autonomous_tax_loss_uplift: false, exempt_company_expense: 0,
+      scenario_gross_monthlies: [2000, 3000, 4000, 5000, 6000, 7000],
+      freelance_quick_rates: [200, 250, 280]
+    };
+    const state = {...defaults};
+    const money = new Intl.NumberFormat("pt-PT", {style:"currency", currency:"EUR"});
+    const pct = new Intl.NumberFormat("pt-PT", {style:"percent", minimumFractionDigits:1, maximumFractionDigits:1});
+    const icons = {
+      home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+      calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M8 7h8M9 11h.01M12 11h.01M15 11h.01M9 15h.01M12 15h.01M15 15h.01"/></svg>',
+      compare:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 4v16M17 4v16M4 8h6M14 8h6M4 16h6M14 16h6"/></svg>',
+      briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12h18"/></svg>',
+      settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a8 8 0 0 0 .1-6l2-1.4-2-3.4-2.4 1a8 8 0 0 0-5.2-3l-.4-2.2h-4l-.4 2.2a8 8 0 0 0-5.2 3l-2.4-1-2 3.4 2 1.4a8 8 0 0 0 .1 6l-2 1.4 2 3.4 2.4-1a8 8 0 0 0 5.2 3l.4 2.2h4l.4-2.2a8 8 0 0 0 5.2-3l2.4 1 2-3.4-2-1.4Z"/></svg>',
+      help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.8 2.8 0 0 1 5.2 1.4c0 2-2.7 2.3-2.7 4.1"/><path d="M12 18h.01"/></svg>'
+    };
+    document.querySelectorAll("[data-icon]").forEach(el => el.innerHTML = icons[el.dataset.icon]);
+    const val = x => {
+      if (typeof x === "number") return Number.isFinite(x) ? x : 0;
+      const parsed = Number(String(x ?? "").trim().replace(/\s/g, "").replace(",", "."));
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    const irs = income => brackets.reduce((sum, [low, high, rate]) => sum + Math.max(0, Math.min(income, high) - low) * rate, 0);
+    const conjugalQuotient = status => String(status || "").trim().toLowerCase().startsWith("casado") ? 2 : 1;
+    const annualIrsByFormula = (taxableIncome, quotient) => {
+      quotient = Math.max(1, Math.trunc(quotient || 1));
+      const taxableByQuotient = Math.max(0, taxableIncome) / quotient;
+      const row = brackets.find(([, high]) => taxableByQuotient <= high) || brackets[brackets.length - 1];
+      const [low,, rate] = row;
+      const parcelToDeduct = low * rate - irs(low);
+      const taxBeforeParcel = taxableByQuotient * rate;
+      const taxAfterParcel = Math.max(0, taxBeforeParcel - parcelToDeduct);
+      const coletaTotal = taxAfterParcel * quotient;
+      return {quotient, taxable_by_quotient:taxableByQuotient, rate, parcel_to_deduct:parcelToDeduct, tax_before_parcel:taxBeforeParcel, tax_before_quotient:taxAfterParcel, coleta_total:coletaTotal};
+    };
+    const withholdingAbatement = (row, remuneration) => {
+      if (row.abatement.includes("1.273,85")) return row.rate * 2.6 * (1273.85 - remuneration);
+      if (row.abatement.includes("1.554,83")) return row.rate * 1.35 * (1554.83 - remuneration);
+      return val(row.abatement.replaceAll(".", "").replace(",", "."));
+    };
+    const monthlyWithholding = (remuneration, dependents, maritalStatus = "Solteiro") => {
+      const table = withholdingTableByStatus(maritalStatus);
+      const remunerationBase = Math.max(0, remuneration);
+      const row = table.find(item => remunerationBase <= item.upper) || table[table.length - 1];
+      const abatement = withholdingAbatement(row, remunerationBase);
+      const dependentAbatement = Math.max(0, dependents) * row.dep;
+      const tax = Math.max(0, remunerationBase * row.rate - abatement - dependentAbatement);
+      return {tax, rate:row.rate, abatement, dependent_abatement:dependentAbatement, bracket:row.label, quotient:1};
+    };
+    const get = (obj, path) => path.split(".").reduce((acc, key) => acc && acc[key], obj);
+    const signed = value => value > 0 ? "+" + money.format(value) : money.format(value || 0);
+    const dateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const addDays = (date, days) => {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    };
+    const easterSunday = year => {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month, day);
+    };
+    const portugalNationalHolidays = year => {
+      const easter = easterSunday(year);
+      const fixed = ["01-01", "04-25", "05-01", "06-10", "08-15", "10-05", "11-01", "12-01", "12-08", "12-25"];
+      const holidays = new Set(fixed.map(day => `${year}-${day}`));
+      holidays.add(dateKey(addDays(easter, -2)));
+      holidays.add(dateKey(addDays(easter, 60)));
+      return holidays;
+    };
+    const businessDaysPortugal = yearMonth => {
+      const [year, month] = String(yearMonth).split("-").map(Number);
+      if (!year || !month) return Math.max(0, val(state.freelance_days_month));
+      const holidays = portugalNationalHolidays(year);
+      const lastDay = new Date(year, month, 0).getDate();
+      let total = 0;
+      for (let day = 1; day <= lastDay; day++) {
+        const date = new Date(year, month - 1, day);
+        const weekday = date.getDay();
+        if (weekday !== 0 && weekday !== 6 && !holidays.has(dateKey(date))) total++;
+      }
+      return total;
+    };
+    const next12BusinessDaysPortugal = () => {
+      const now = new Date();
+      const firstMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      let total = 0;
+      for (let index = 0; index < 12; index++) {
+        const date = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + index, 1);
+        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        total += businessDaysPortugal(value);
+      }
+      return total;
+    };
+    const revenueVat = (grossBilling, data) => {
+      if (data.vat_exempt) return {revenue:grossBilling, vat:0, billing:grossBilling};
+      if (data.vat_included) {
+        const revenue = grossBilling / (1 + data.vat_rate);
+        return {revenue, vat:grossBilling - revenue, billing:grossBilling};
+      }
+      return {revenue:grossBilling, vat:grossBilling * data.vat_rate, billing:grossBilling * (1 + data.vat_rate)};
+    };
+    const companyTaxableExpensesMonthly = data =>
+      val(data.expense_phone_internet) +
+      val(data.expense_energy) +
+      val(data.expense_accountant) +
+      val(data.expense_health_plan) +
+      val(data.expense_other_company);
+    const companyExemptExpensesMonthly = data => val(data.exempt_company_expense);
+    const autonomousTaxBaseMonthly = data => autonomousTaxEntries(data).reduce((total, entry) => total + Math.max(0, val(entry.amount)), 0);
+    const companyExpensesMonthly = data => companyTaxableExpensesMonthly(data) + companyExemptExpensesMonthly(data) + autonomousTaxBaseMonthly(data);
+    const companyExpensesYear = (data, months = 12) => companyExpensesMonthly(data) * Math.max(1, months);
+    const companyTaxableExpensesYear = (data, months = 12) => companyTaxableExpensesMonthly(data) * Math.max(1, months);
+    const autonomousTaxBaseYear = (data, months = 12) => autonomousTaxBaseMonthly(data) * Math.max(1, months);
+    const autonomousTax = (data, months = 12) => autonomousTaxEntries(data).reduce((total, entry) => {
+      const amount = Math.max(0, val(entry.amount)) * Math.max(1, months);
+      return total + amount * autonomousTaxRate(data, entry.type);
+    }, 0);
+
+    function freelancerTaxBase(revenue, data) {
+      const employeeSalaryCount = Math.max(1, data.employee_salary_count || data.salary_count || defaults.employee_salary_count);
+      const employeeSalaryMonthly = Math.max(0, data.employee_salary_monthly || 0);
+      const employeeSalaryYear = employeeSalaryMonthly * employeeSalaryCount;
+      const freelanceMonths = 12;
+      if (employeeSalaryYear > 0) {
+        const ss = data.freelance_ss_exempt ? 0 : employeeSalaryYear * data.ss_rate_employee;
+        const withholding = monthlyWithholding(employeeSalaryMonthly, data.employee_dependents, data.employee_marital_status);
+        const tax = withholding.tax * employeeSalaryCount;
+        const employeeNetMonthly = employeeSalaryMonthly - (ss / employeeSalaryCount) - withholding.tax;
+        const employeeNetYear = employeeNetMonthly * employeeSalaryCount;
+        return {
+          employee_salary_year: employeeSalaryYear,
+          employee_salary_monthly: employeeSalaryMonthly,
+          employee_net_year: employeeNetYear,
+          employee_net_monthly: employeeNetMonthly,
+          social_security: ss,
+          social_security_monthly: ss / employeeSalaryCount,
+          irs: tax,
+          monthly_irs: withholding.tax,
+          irs_rate: withholding.rate,
+          irs_base: employeeSalaryMonthly,
+          irs_mode: "employee"
+        };
+      }
+
+      const relevantSs = revenue * data.freelance_ss_relevant_rate;
+      const ss = data.freelance_ss_exempt ? 0 : relevantSs * data.freelance_ss_rate;
+      const irsBase = Math.max(0, revenue * data.freelance_irs_coefficient - data.freelance_adjustments);
+      const annualIrs = annualIrsByFormula(irsBase, conjugalQuotient(data.employee_marital_status || data.marital_status));
+      const taxCredits = (data.personal_deductions || 0) + (data.other_deductions || 0) + Math.max(0, data.employee_dependents || 0) * DEPENDENT_TAX_CREDIT;
+      const tax = Math.max(0, annualIrs.coleta_total - taxCredits);
+      return {
+        employee_salary_year: 0,
+        employee_salary_monthly: 0,
+        employee_net_year: 0,
+        employee_net_monthly: 0,
+        social_security: ss,
+        social_security_monthly: ss / freelanceMonths,
+        irs: tax,
+        monthly_irs: tax / freelanceMonths,
+        irs_rate: annualIrs.rate,
+        irs_base: irsBase,
+        irs_mode: "revenue"
+      };
+    }
+
+    function quick(dayRate, billableDaysYear, months, data, contractNet) {
+      const vatCalc = revenueVat(dayRate * billableDaysYear, data);
+      const revenue = vatCalc.revenue;
+      const taxBase = freelancerTaxBase(revenue, data);
+      const expensesYear = companyExpensesYear(data, months);
+      const expensesMonth = expensesYear / months;
+      const autonomousTaxYear = autonomousTax(data, months);
+      const autonomousTaxMonth = autonomousTaxYear / months;
+      const companyIrcBase = Math.max(0, revenue - expensesYear - taxBase.employee_salary_year);
+      const companyIrcOnly = companyIrcBase * data.company_irc_rate;
+      const companyIrc = companyIrcOnly + autonomousTaxYear;
+      const net = revenue - expensesYear - taxBase.employee_salary_year - taxBase.social_security - taxBase.irs - companyIrc;
+      const netMonth = revenue / months - expensesMonth - taxBase.employee_salary_monthly - taxBase.social_security_monthly - taxBase.monthly_irs - companyIrc / months;
+      const combinedNet = net + taxBase.employee_net_year;
+      const combinedNetMonth = netMonth + taxBase.employee_net_monthly;
+      return {
+        day_rate:dayRate,
+        revenue,
+        revenue_month: revenue / months,
+        vat: vatCalc.vat,
+        vat_month: vatCalc.vat / months,
+        employee_salary_year: taxBase.employee_salary_year,
+        employee_salary_monthly: taxBase.employee_salary_monthly,
+        employee_net_year: taxBase.employee_net_year,
+        employee_net_monthly: taxBase.employee_net_monthly,
+        social_security:taxBase.social_security,
+        social_security_month:taxBase.social_security_monthly,
+        irs:taxBase.irs,
+        irs_month:taxBase.monthly_irs,
+        company_irc:companyIrc,
+        company_irc_month:companyIrc / months,
+        company_irc_only:companyIrcOnly,
+        company_irc_only_month:companyIrcOnly / months,
+        autonomous_tax:autonomousTaxYear,
+        autonomous_tax_month:autonomousTaxMonth,
+        autonomous_tax_base:autonomousTaxBaseYear(data, months),
+        autonomous_tax_base_month:autonomousTaxBaseMonthly(data),
+        company_irc_base:companyIrcBase,
+        company_expenses:expensesYear,
+        company_expenses_month:expensesMonth,
+        net,
+        net_month:netMonth,
+        combined_net:combinedNet,
+        combined_net_month:combinedNetMonth,
+        difference:combinedNet - contractNet
+      };
+    }
+
+    function calculate() {
+      const grossYear = state.gross_monthly * Math.max(1, state.salary_count);
+      const mealMonthly = state.meal_allowance * Math.max(0, state.meal_days_month);
+      const mealYear = mealMonthly * state.meal_months;
+      const mealExemptMonthly = state.meal_exempt_daily * Math.max(0, state.meal_days_month);
+      const mealExemptMonthlyUsed = Math.min(mealMonthly, mealExemptMonthly);
+      const mealTaxableMonthly = Math.max(0, mealMonthly - mealExemptMonthly);
+      const mealExempt = mealExemptMonthlyUsed * state.meal_months;
+      const mealTaxable = mealTaxableMonthly * state.meal_months;
+      const employeeSs = grossYear * state.ss_rate_employee;
+      const deduction = Math.max(state.specific_deduction, employeeSs);
+      const taxableBeforeYoung = Math.max(0, grossYear + mealTaxable + state.other_taxable_income - deduction);
+      let youngExemption = 0;
+      if (state.irs_young && jovem[Math.trunc(state.irs_young_year)]) {
+        const [rate, cap] = jovem[Math.trunc(state.irs_young_year)];
+        youngExemption = Math.min(taxableBeforeYoung, cap * rate);
+      }
+      const taxable = Math.max(0, taxableBeforeYoung - youngExemption);
+      const dependentDeductions = Math.max(0, state.dependents) * DEPENDENT_TAX_CREDIT;
+      const totalTaxCredits = state.personal_deductions + state.other_deductions + dependentDeductions;
+      const monthlyRemuneration = Math.max(0, state.gross_monthly + mealTaxableMonthly + state.other_taxable_income / Math.max(1, state.salary_count) - youngExemption / Math.max(1, state.salary_count));
+      const withholding = monthlyWithholding(monthlyRemuneration, state.dependents, state.marital_status);
+      const annualIrs = annualIrsByFormula(taxable, conjugalQuotient(state.marital_status));
+      const contractIrs = Math.max(0, annualIrs.coleta_total - totalTaxCredits);
+      const withholdingIrs = withholding.tax * Math.max(1, state.salary_count);
+      const irsSettlement = contractIrs - withholdingIrs;
+      const expensesYear = state.expenses_monthly * Math.max(1, state.salary_count);
+      const mealReceived = state.other_exempt_cash ? mealYear : 0;
+      const otherExemptIncomeYear = state.other_exempt_income * Math.max(0, state.meal_months);
+      const totalReceived = grossYear + mealReceived + otherExemptIncomeYear;
+      const totalReceivedMonthly = state.gross_monthly + (state.other_exempt_cash ? mealMonthly : 0) + state.other_exempt_income;
+      const netYear = totalReceived - employeeSs - withholdingIrs - expensesYear;
+      const netMonth = totalReceivedMonthly - employeeSs / Math.max(1, state.salary_count) - withholding.tax - state.expenses_monthly;
+      const effectiveRate = totalReceived ? (employeeSs + withholdingIrs) / totalReceived : 0;
+
+      const months = 12;
+      const freelanceBillableDaysYear = state.freelance_days_mode === "next12" ? next12BusinessDaysPortugal() : Math.max(0, state.freelance_days_month) * months;
+      const vatCalc = revenueVat(state.freelance_day_rate * freelanceBillableDaysYear, state);
+      const revenue = vatCalc.revenue;
+      const companyExpenses = companyExpensesYear(state, months);
+      const companyExpensesMonth = companyExpenses / months;
+      const autonomousTaxYear = autonomousTax(state, months);
+      const autonomousTaxMonth = autonomousTaxYear / months;
+      const freelanceTaxBase = freelancerTaxBase(revenue, state);
+      const employeeSalaryYear = freelanceTaxBase.employee_salary_year;
+      const companyIrcBase = Math.max(0, revenue - companyExpenses - employeeSalaryYear);
+      const companyIrcOnly = companyIrcBase * state.company_irc_rate;
+      const companyIrc = companyIrcOnly + autonomousTaxYear;
+      const freelanceSs = freelanceTaxBase.social_security;
+      const freelanceIrs = freelanceTaxBase.irs;
+      const freelanceNet = revenue - companyExpenses - employeeSalaryYear - freelanceSs - freelanceIrs - companyIrc;
+      const freelanceNetMonth = revenue / months - companyExpensesMonth - freelanceTaxBase.employee_salary_monthly - freelanceTaxBase.social_security_monthly - freelanceTaxBase.monthly_irs - companyIrc / months;
+      const combinedFreelanceNet = freelanceNet + freelanceTaxBase.employee_net_year;
+      const combinedFreelanceNetMonth = freelanceNetMonth + freelanceTaxBase.employee_net_monthly;
+
+      const scenarios = (state.scenario_gross_monthlies || defaults.scenario_gross_monthlies).map((monthly, index) => {
+        monthly = Math.max(0, val(monthly));
+        const annual = monthly * Math.max(1, state.salary_count);
+        const ss = annual * state.ss_rate_employee;
+        const scenarioGrossTaxable = annual + mealTaxable + state.other_taxable_income;
+        const scenarioTaxableBeforeYoung = Math.max(0, scenarioGrossTaxable - Math.max(state.specific_deduction, ss));
+        let scenarioYoungExemption = 0;
+        if (state.irs_young && jovem[Math.trunc(state.irs_young_year)]) {
+          const [rate, cap] = jovem[Math.trunc(state.irs_young_year)];
+          scenarioYoungExemption = Math.min(scenarioTaxableBeforeYoung, cap * rate);
+        }
+        const scenarioTaxable = Math.max(0, scenarioTaxableBeforeYoung - scenarioYoungExemption);
+        const scenarioGrossIrs = annualIrsByFormula(scenarioTaxable, annualIrs.quotient).coleta_total;
+        const tax = Math.max(0, scenarioGrossIrs - totalTaxCredits);
+        const scenarioMonthlyRemuneration = Math.max(0, monthly + mealTaxableMonthly + state.other_taxable_income / Math.max(1, state.salary_count) - scenarioYoungExemption / Math.max(1, state.salary_count));
+        const scenarioWithholding = monthlyWithholding(scenarioMonthlyRemuneration, state.dependents, state.marital_status);
+        const scenarioWithholdingIrs = scenarioWithholding.tax * Math.max(1, state.salary_count);
+        const scenarioMealReceived = state.other_exempt_cash ? mealYear : 0;
+        const scenarioTotalReceived = annual + scenarioMealReceived + otherExemptIncomeYear;
+        const scenarioTotalReceivedMonthly = monthly + (state.other_exempt_cash ? mealMonthly : 0) + state.other_exempt_income;
+        const net = scenarioTotalReceived - ss - scenarioWithholdingIrs - expensesYear;
+        const netMonthly = scenarioTotalReceivedMonthly - ss / Math.max(1, state.salary_count) - scenarioWithholding.tax - state.expenses_monthly;
+        return {index, name:`Cenário ${index + 1}`, gross_monthly:monthly, gross_year:annual, social_security:ss, social_security_month:ss / Math.max(1, state.salary_count), irs:scenarioWithholdingIrs, irs_month:scenarioWithholding.tax, irs_liquidated:tax, net_year:net, net_month:netMonthly};
+      });
+
+      return {
+        contract: {
+          gross_year:grossYear, meal_daily:state.meal_allowance, meal_monthly:mealMonthly, meal_year:mealYear, meal_received:mealReceived, meal_days_month:state.meal_days_month, meal_exempt_daily:state.meal_exempt_daily, meal_exempt_monthly:mealExemptMonthly, meal_exempt_monthly_used:mealExemptMonthlyUsed, meal_exempt:mealExempt, meal_taxable_monthly:mealTaxableMonthly, meal_taxable:mealTaxable, other_exempt_income:state.other_exempt_income, other_exempt_income_year:otherExemptIncomeYear, other_exempt_cash:state.other_exempt_cash, other_exempt_received:otherExemptIncomeYear, expenses_monthly:state.expenses_monthly, expenses_year:expensesYear, total_received:totalReceived, total_received_monthly:totalReceivedMonthly, employee_ss:employeeSs,
+          deduction, taxable_income:taxable, conjugal_quotient:annualIrs.quotient, taxable_by_quotient:annualIrs.taxable_by_quotient, irs_rate:annualIrs.rate, irs_parcel_to_deduct:annualIrs.parcel_to_deduct, irs_tax_before_parcel:annualIrs.tax_before_parcel, irs_tax_before_quotient:annualIrs.tax_before_quotient, coleta_total:annualIrs.coleta_total, monthly_remuneration:monthlyRemuneration, withholding_rate:withholding.rate, withholding_abatement:withholding.abatement, withholding_dependent_abatement:withholding.dependent_abatement, withholding_irs:withholdingIrs, monthly_withholding_irs:withholding.tax, irs_settlement:irsSettlement, dependent_deductions:dependentDeductions, total_tax_credits:totalTaxCredits, irs:contractIrs, net_year:netYear, net_month:netMonth,
+          effective_rate:effectiveRate,
+          lines: [
+            ["Salário bruto", "Salário bruto mensal x n.º salários", grossYear, null, "income", state.gross_monthly],
+            ["Subsídio alimentação", "Subsídio diário x dias/mês x meses; soma apenas com pagamento em dinheiro", mealReceived, null, "income", state.other_exempt_cash ? mealMonthly : 0],
+            ["Outros rendimentos isentos", "Valor mensal x meses; soma ao líquido sem compor base de IRS ou SS", otherExemptIncomeYear, null, "income", state.other_exempt_income],
+            ["Total recebido bruto", "Salário bruto + subsídio alimentação em dinheiro + rendimentos isentos", totalReceived, null, "subtotal", totalReceivedMonthly],
+            ["Segurança Social", "Salário bruto x taxa SS trabalhador", employeeSs, state.ss_rate_employee, "deduction", employeeSs / Math.max(1, state.salary_count)],
+            ["Dedução específica", "Maior entre 8,54 x IAS e SS anual; usada apenas para apurar IRS", deduction, null, "info"],
+            ["Parte isenta do subsídio", "Mín(subsídio diário; limite isento diário) x dias/mês x meses; incluída no líquido", mealExempt, null, "info", mealExemptMonthlyUsed],
+            ["Excedente tributável do subsídio", "Máx(0; subsídio diário - limite isento diário) x dias/mês x meses", mealTaxable, null, "info", mealTaxableMonthly],
+            ["Outros rendimentos tributáveis", "Valor informado em parâmetros; usado apenas na base de IRS", state.other_taxable_income, null, "info"],
+            ["Rendimento coletável", "Rendimentos brutos tributáveis - dedução específica - isenção IRS Jovem", taxable, null, "subtotal"],
+            ["Retenção anual estimada", "Retenção mensal pela tabela considerando estado civil x n.º salários", withholdingIrs, withholding.rate, "deduction", withholding.tax],
+            ["Despesas", "Despesas mensais x n.º salários", expensesYear, null, "deduction", state.expenses_monthly],
+            ["Salário líquido", "Total recebido bruto - Segurança Social - retenção anual estimada - despesas", netYear, null, "result", netMonth]
+          ]
+        },
+        freelancer: {
+          revenue, vat:vatCalc.vat, social_security:freelanceSs, irs:freelanceIrs, company_irc:companyIrc, company_irc_base:companyIrcBase, company_expenses:companyExpenses, company_expenses_month:companyExpensesMonth, net_year:freelanceNet,
+          company_irc_only:companyIrcOnly, company_irc_only_month:companyIrcOnly / months, autonomous_tax:autonomousTaxYear, autonomous_tax_month:autonomousTaxMonth,
+          autonomous_tax_base:autonomousTaxBaseYear(state, months), autonomous_tax_base_month:autonomousTaxBaseMonthly(state),
+          net_month:freelanceNetMonth, effective_rate: revenue ? (freelanceSs + freelanceIrs + companyIrc) / revenue : 0,
+          employee_net_year:freelanceTaxBase.employee_net_year, employee_net_month:freelanceTaxBase.employee_net_monthly,
+          combined_net_year:combinedFreelanceNet, combined_net_month:combinedFreelanceNetMonth,
+          difference_year:combinedFreelanceNet - netYear, difference_month:combinedFreelanceNetMonth - netMonth,
+          billable_days_year:freelanceBillableDaysYear, billable_days_month:freelanceBillableDaysYear / months,
+          current: quick(state.freelance_day_rate, freelanceBillableDaysYear, months, state, netYear),
+          quick_table: (state.freelance_quick_rates || defaults.freelance_quick_rates).map((rate, index) => ({...quick(val(rate), freelanceBillableDaysYear, months, state, netYear), index}))
+        },
+        scenarios
+      };
+    }
+
+    function setInputs() {
+      document.querySelectorAll("[data-model]").forEach(input => {
+        const key = input.id;
+        if (input.type === "checkbox") input.checked = Boolean(state[key]);
+        else if (input.dataset.decimal != null && document.activeElement === input) return;
+        else input.value = state[key] ?? "";
+      });
+      const freelanceDaysInput = document.querySelector("#freelance_days_month");
+      const freelanceDaysLabel = document.querySelector("#freelance_days_label");
+      if (freelanceDaysInput && state.freelance_days_mode === "next12") {
+        freelanceDaysInput.value = next12BusinessDaysPortugal();
+        freelanceDaysInput.readOnly = true;
+        if (freelanceDaysLabel) freelanceDaysLabel.textContent = "Dias úteis nos próximos 12 meses";
+      } else if (freelanceDaysInput) {
+        freelanceDaysInput.readOnly = false;
+        if (freelanceDaysLabel) freelanceDaysLabel.textContent = "Dias faturáveis/mês";
+      }
+      document.querySelectorAll("[data-alias]").forEach(input => {
+        if (input.dataset.decimal != null && document.activeElement === input) return;
+        input.value = state[input.dataset.alias] ?? "";
+      });
+    }
+
+    function drawContractCostPie(data) {
+      const canvas = document.querySelector("#contract_cost_pie");
+      const legend = document.querySelector("#contract_cost_legend");
+      if (!canvas || !legend) return;
+
+      const salaryCount = Math.max(1, state.salary_count || defaults.salary_count);
+      const slices = [
+        {label: "Salário líquido", value: Math.max(0, data.contract.net_month), color: "#0a7f42"},
+        {label: "Segurança Social", value: Math.max(0, data.contract.employee_ss / salaryCount), color: "#d84f4f"},
+        {label: "Retenção IRS", value: Math.max(0, data.contract.monthly_withholding_irs), color: "#f0a51a"},
+        {label: "Despesas", value: Math.max(0, data.contract.expenses_monthly), color: "#6b7280"}
+      ].filter(item => Math.round(item.value * 100) > 0);
+
+      const total = slices.reduce((sum, item) => sum + item.value, 0);
+      const size = 220;
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = size * ratio;
+      canvas.height = size * ratio;
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, size, size);
+
+      if (!total) {
+        legend.innerHTML = `<div class="hint">Sem valores mensais para exibir.</div>`;
+        return;
+      }
+
+      let start = -Math.PI / 2;
+      slices.forEach(item => {
+        const angle = (item.value / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(size / 2, size / 2);
+        ctx.arc(size / 2, size / 2, size / 2 - 6, start, start + angle);
+        ctx.closePath();
+        ctx.fillStyle = item.color;
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        start += angle;
+      });
+
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, 48, 0, Math.PI * 2);
+      ctx.fillStyle = "#f8fbfd";
+      ctx.fill();
+      ctx.fillStyle = "#17384d";
+      ctx.font = "800 13px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Mensal", size / 2, size / 2 - 8);
+      ctx.font = "800 15px Arial";
+      ctx.fillText(money.format(total), size / 2, size / 2 + 13);
+
+      legend.innerHTML = slices.map(item => `
+        <div class="pie-item">
+          <span class="pie-dot" style="background:${item.color}"></span>
+          <span>${item.label}</span>
+          <span class="pie-value">${money.format(item.value)}</span>
+          <span class="pie-percent">${pct.format(item.value / total)}</span>
+        </div>
+      `).join("");
+    }
+
+    function updatePrintVisibility() {
+      const panel = document.querySelector(".calculation-params-panel");
+      if (panel) {
+        const isEmpty = !state.irs_young
+          && Math.round(Math.abs(val(state.other_taxable_income)) * 100) === 0
+          && Math.round(Math.abs(val(state.other_exempt_income)) * 100) === 0
+          && Math.round(Math.abs(val(state.expenses_monthly)) * 100) === 0
+          && Math.round(Math.abs(val(state.irs_young_year)) * 100) === 0;
+        panel.classList.toggle("print-hide-empty", isEmpty);
+      }
+      document.querySelectorAll("#freelancer .freelancer-switches .toggle-row").forEach(row => {
+        const checkbox = row.querySelector("input[type='checkbox']");
+        row.classList.toggle("print-hide-off", Boolean(checkbox && !checkbox.checked));
+      });
+      document.querySelector("#freelancer .autonomous-tax-editor")?.classList.toggle("print-hide-off", !hasAutonomousTaxIncidence(state));
+    }
+
+    function render() {
+      const data = calculate();
+      document.querySelectorAll("[data-out]").forEach(el => {
+        const value = get(data, el.dataset.out) || 0;
+        el.textContent = el.dataset.signed ? signed(value) : money.format(value);
+        el.classList.toggle("positive", el.dataset.signed && value >= 0);
+        el.classList.toggle("negative", el.dataset.signed && value < 0);
+      });
+      document.querySelectorAll("[data-percent]").forEach(el => el.textContent = pct.format(get(data, el.dataset.percent) || 0));
+      document.querySelector("#contract_net_year_label").textContent = `${money.format(data.contract.net_year)} anual`;
+      document.querySelector("#tax_total_month").textContent = money.format((data.contract.employee_ss / Math.max(1, state.salary_count || defaults.salary_count)) + data.contract.monthly_withholding_irs);
+      document.querySelector("#tax_total_year").textContent = `${money.format(data.contract.employee_ss + data.contract.withholding_irs)} anual`;
+      document.querySelector("#difference_formula_month").textContent = `${money.format(data.freelancer.net_month)} + ${money.format(data.freelancer.employee_net_month)} - ${money.format(data.contract.net_month)} = ${signed(data.freelancer.difference_month)}`;
+      document.querySelector("#difference_formula_year").textContent = `${money.format(data.freelancer.net_year)} + ${money.format(data.freelancer.employee_net_year)} - ${money.format(data.contract.net_year)} = ${signed(data.freelancer.difference_year)}`;
+      document.querySelector("#company_irc_formula").textContent = `${money.format(data.freelancer.revenue)} - ${money.format(data.freelancer.company_expenses)} - ${money.format(data.freelancer.current.employee_salary_year)} = ${money.format(data.freelancer.company_irc_base)} x ${pct.format(state.company_irc_rate)} = ${money.format(data.freelancer.company_irc_only)} + trib. autónoma ${money.format(data.freelancer.autonomous_tax)} = ${money.format(data.freelancer.company_irc)}`;
+      const detailMoney = (row, amount) => money.format(row[4] === "deduction" ? -Math.abs(amount) : amount);
+      const detailAnnual = row => row[4] === "factor" ? Number(row[2] || 0).toLocaleString("pt-PT", { maximumFractionDigits: 2 }) : detailMoney(row, row[2]);
+      const detailMonthly = row => row[4] === "factor" ? "" : detailMoney(row, row[5] ?? (row[2] / Math.max(1, state.salary_count || defaults.salary_count)));
+      const hiddenDetailItems = new Set(["Dedução específica", "Rendimento coletável"]);
+      const visibleDetailRows = data.contract.lines.filter(row => !hiddenDetailItems.has(row[0]) && (row[4] === "factor" || Math.round(Math.abs(row[2] || 0) * 100) !== 0));
+      document.querySelector("#details").innerHTML = visibleDetailRows.map(row => `<tr class="detail-${row[4] || "info"}"><td>${row[0]}</td><td>${row[1]}</td><td class="money-cell">${detailAnnual(row)}</td><td class="money-cell">${detailMonthly(row)}</td><td>${row[3] == null ? "" : pct.format(row[3])}</td></tr>`).join("");
+      drawContractCostPie(data);
+      document.querySelector("#scenario_table").innerHTML = data.scenarios.map(row => `<tr><td>${row.name}</td><td><input class="table-input" type="text" inputmode="decimal" data-decimal data-scenario-monthly="${row.index}" value="${row.gross_monthly}"></td><td>${money.format(row.gross_year)}</td><td>${money.format(row.social_security)}</td><td>${money.format(row.social_security_month)}</td><td>${money.format(row.irs)}</td><td>${money.format(row.irs_month)}</td><td>${money.format(row.net_year)}</td><td>${money.format(row.net_month)}</td></tr>`).join("");
+      document.querySelector("#autonomous_tax_table").innerHTML = autonomousTaxEntries(state).map((entry, index) => {
+        const options = Object.entries(autonomousTaxOptions).map(([key, option]) => `<option value="${key}" ${entry.type === key ? "selected" : ""}>${option.label}</option>`).join("");
+        return `<tr><td><select data-autonomous-type="${index}">${options}</select></td><td><input type="text" inputmode="decimal" data-decimal data-autonomous-amount="${index}" value="${entry.amount ?? 0}"></td><td>${pct.format(autonomousTaxRate(state, entry.type))}</td><td><button class="mini-button" type="button" data-autonomous-remove="${index}">X</button></td></tr>`;
+      }).join("");
+      const current = data.freelancer.current;
+      const currentMonthlyDifference = current.combined_net_month - data.contract.net_month;
+      document.querySelector("#freelance_current").innerHTML = `
+        <tr><td>Anual</td><td>${money.format(current.day_rate)}</td><td>${money.format(current.revenue)}</td><td>${money.format(current.vat)}</td><td>${money.format(current.social_security)}</td><td>${money.format(current.irs)}</td><td>${money.format(current.company_irc)}</td><td>${money.format(current.net)}</td><td class="${current.difference >= 0 ? "positive" : "negative"}">${signed(current.difference)}</td></tr>
+        <tr><td>Mensal</td><td>${money.format(current.day_rate)}</td><td>${money.format(current.revenue_month)}</td><td>${money.format(current.vat_month)}</td><td>${money.format(current.social_security_month)}</td><td>${money.format(current.irs_month)}</td><td>${money.format(current.company_irc_month)}</td><td>${money.format(current.net_month)}</td><td class="${currentMonthlyDifference >= 0 ? "positive" : "negative"}">${signed(currentMonthlyDifference)}</td></tr>
+      `;
+      document.querySelector("#freelance_table").innerHTML = data.freelancer.quick_table.map(row => {
+        const monthlyDifference = row.combined_net_month - data.contract.net_month;
+        return `
+          <tr class="simulation-start"><td>Anual</td><td><input class="table-input" type="text" inputmode="decimal" data-decimal data-quick-rate="${row.index}" value="${row.day_rate}"></td><td>${money.format(row.revenue)}</td><td>${money.format(row.vat)}</td><td>${money.format(row.social_security)}</td><td>${money.format(row.irs)}</td><td>${money.format(row.company_irc)}</td><td>${money.format(row.net)}</td><td class="${row.difference >= 0 ? "positive" : "negative"}">${signed(row.difference)}</td></tr>
+          <tr class="simulation-month"><td>Mensal</td><td>${money.format(row.day_rate)}</td><td>${money.format(row.revenue_month)}</td><td>${money.format(row.vat_month)}</td><td>${money.format(row.social_security_month)}</td><td>${money.format(row.irs_month)}</td><td>${money.format(row.company_irc_month)}</td><td>${money.format(row.net_month)}</td><td class="${monthlyDifference >= 0 ? "positive" : "negative"}">${signed(monthlyDifference)}</td></tr>
+        `;
+      }).join("");
+      document.querySelector("#bracket_table").innerHTML = withholdingTable.map(row => `<tr><td>${row.label}</td><td>${pct.format(row.rate)}</td><td>${row.abatement}</td><td>${money.format(row.dep)}</td><td>${row.effective}</td></tr>`).join("");
+      updatePrintVisibility();
+    }
+
+    function updateFromField(input) {
+      if (input.matches("[data-autonomous-type]")) {
+        const index = Number(input.dataset.autonomousType);
+        state.autonomous_tax_entries = [...autonomousTaxEntries(state)];
+        state.autonomous_tax_entries[index] = {...state.autonomous_tax_entries[index], type: input.value};
+        render();
+        return;
+      }
+      if (input.matches("[data-autonomous-amount]")) {
+        const index = Number(input.dataset.autonomousAmount);
+        state.autonomous_tax_entries = [...autonomousTaxEntries(state)];
+        state.autonomous_tax_entries[index] = {...state.autonomous_tax_entries[index], amount: val(input.value)};
+        render();
+        return;
+      }
+      if (input.matches("[data-scenario-monthly]")) {
+        const index = Number(input.dataset.scenarioMonthly);
+        state.scenario_gross_monthlies = [...(state.scenario_gross_monthlies || defaults.scenario_gross_monthlies)];
+        state.scenario_gross_monthlies[index] = val(input.value);
+        render();
+        return;
+      }
+      if (input.matches("[data-quick-rate]")) {
+        const index = Number(input.dataset.quickRate);
+        state.freelance_quick_rates = [...(state.freelance_quick_rates || defaults.freelance_quick_rates)];
+        state.freelance_quick_rates[index] = val(input.value);
+        render();
+        return;
+      }
+      if (input.matches("#meal_enabled")) {
+        state.meal_allowance = input.checked ? defaults.meal_allowance : 0;
+        setInputs();
+        render();
+        return;
+      }
+      if (input.matches("#freelance_days_mode")) {
+        state.freelance_days_mode = input.value;
+        setInputs();
+        render();
+        return;
+      }
+      const key = input.dataset.alias || (input.dataset.model != null ? input.id : null);
+      if (!key) return;
+      state[key] = input.type === "checkbox" ? input.checked : (input.dataset.decimal != null ? val(input.value) : (input.type === "number" ? val(input.value) : input.value));
+      setInputs();
+      render();
+    }
+
+    async function sendSimulationByEmail() {
+      const email = prompt("Informe o endereço de e-mail para envio da simulação:");
+      if (email == null) return;
+      const address = email.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+        alert("Informe um endereço de e-mail válido.");
+        return;
+      }
+
+      const button = document.querySelector("#send_email_button");
+      const previousText = button?.textContent;
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Enviando...";
+      }
+
+      try {
+        const endpoint = "/send-email";
+        const response = await fetch(endpoint, {
+          method: "POST",
+          cache: "no-store",
+          headers: {"Content-Type": "application/json; charset=utf-8"},
+          body: JSON.stringify({
+            email: address,
+            html: buildEmailSnapshotHtml(),
+            text: buildEmailSnapshotText()
+          })
+        });
+        const result = await response.json().catch(() => ({ok: false, error: "Resposta inválida do servidor."}));
+        if (!response.ok || !result.ok) throw new Error(result.error || "Falha ao enviar e-mail.");
+        alert("E-mail enviado automaticamente com o PDF anexado.");
+      } catch (error) {
+        const message = error.message === "Failed to fetch"
+          ? "Não foi possível contactar o servidor local. Reinicie o simulador pelo iniciar_simulador.bat e abra a página em http://127.0.0.1:8080/."
+          : (error.message || "Falha ao enviar e-mail.");
+        alert(message);
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = previousText;
+        }
+      }
+    }
+
+    function buildEmailSnapshotHtml() {
+      render();
+      updatePrintVisibility();
+      const clone = document.documentElement.cloneNode(true);
+      const sourceFields = document.querySelectorAll("input, select, textarea");
+      const cloneFields = clone.querySelectorAll("input, select, textarea");
+      sourceFields.forEach((source, index) => {
+        const target = cloneFields[index];
+        if (!target) return;
+        if (source.matches("input[type='checkbox'], input[type='radio']")) {
+          if (source.checked) {
+            target.setAttribute("checked", "checked");
+          } else {
+            target.removeAttribute("checked");
+          }
+          return;
+        }
+        if (source.tagName === "SELECT") {
+          const selectedValue = source.value;
+          target.setAttribute("value", selectedValue);
+          Array.from(target.options).forEach(option => {
+            if (option.value === selectedValue) {
+              option.setAttribute("selected", "selected");
+            } else {
+              option.removeAttribute("selected");
+            }
+          });
+          return;
+        }
+        if (source.tagName === "TEXTAREA") {
+          target.textContent = source.value;
+          target.setAttribute("value", source.value);
+          return;
+        }
+        target.setAttribute("value", source.value);
+      });
+      clone.querySelectorAll("script").forEach(script => script.remove());
+      return "<!doctype html>\n" + clone.outerHTML;
+    }
+
+    function buildEmailSnapshotText() {
+      const activeView = document.querySelector(".view.active") || document.body;
+      if (activeView.id === "freelancer") return buildFreelancerPdfText();
+      const clone = activeView.cloneNode(true);
+      clone.querySelectorAll("script, style, svg, button, .action-row").forEach(element => element.remove());
+      clone.querySelectorAll("input, select, textarea").forEach(field => {
+        const source = field.id ? document.getElementById(field.id) : field;
+        const replacement = document.createElement("span");
+        if (field.type === "checkbox") {
+          replacement.textContent = source?.checked ? "Sim" : "Nao";
+        } else if (field.tagName === "SELECT") {
+          replacement.textContent = source?.options?.[source.selectedIndex]?.textContent || source?.value || "";
+        } else {
+          replacement.textContent = source?.value || "";
+        }
+        field.replaceWith(replacement);
+      });
+      const title = document.querySelector(".view.active h1")?.textContent?.trim() || "Simulacao";
+      const lines = clone.textContent
+        .split(/\n+/)
+        .map(line => line.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+      return ["Simulador Salarial Portugal 2026", title, "", ...lines].join("\n");
+    }
+
+    function buildFreelancerPdfText() {
+      const data = calculate();
+      const current = data.freelancer.current;
+      const rowText = row => [
+        money.format(row.day_rate),
+        money.format(row.revenue),
+        money.format(row.vat),
+        money.format(row.social_security),
+        money.format(row.irs),
+        money.format(row.company_irc),
+        money.format(row.net),
+        signed(row.difference)
+      ].join(" | ");
+      const monthText = row => [
+        money.format(row.day_rate),
+        money.format(row.revenue_month),
+        money.format(row.vat_month),
+        money.format(row.social_security_month),
+        money.format(row.irs_month),
+        money.format(row.company_irc_month),
+        money.format(row.net_month),
+        signed(row.combined_net_month - data.contract.net_month)
+      ].join(" | ");
+      const quickLines = data.freelancer.quick_table.flatMap(row => [
+        `Anual   | ${rowText(row)}`,
+        `Mensal  | ${monthText(row)}`
+      ]);
+      const autonomousSummary = autonomousTaxEntries(state)
+        .filter(entry => entry.type !== "none" && Math.round(Math.abs(val(entry.amount)) * 100) !== 0)
+        .map(entry => `${autonomousTaxOption(entry.type).label}: ${money.format(entry.amount || 0)}/mes x ${pct.format(autonomousTaxRate(state, entry.type))}`)
+        .join("; ");
+      const activeSwitches = [
+        state.vat_included ? "IVA incluido: Sim" : "",
+        state.vat_exempt ? "Isento IVA: Sim" : "",
+        state.freelance_ss_exempt ? "Isencao SS no primeiro ano: Sim" : "",
+        state.autonomous_tax_loss_uplift ? "Agravamento por prejuizo fiscal: Sim" : ""
+      ].filter(Boolean).join(" | ");
+      const switchLines = activeSwitches ? [activeSwitches] : [];
+      return [
+        "ONE_PAGE",
+        "Simulador Salarial Portugal 2026",
+        "Freelancer vs Contrato",
+        "",
+        "Parametros principais",
+        `Taxa dia: ${money.format(state.freelance_day_rate)} | Dias faturaveis/ano: ${Number(data.freelancer.billable_days_year || 0).toLocaleString("pt-PT")} | Dias media/mes: ${Number(data.freelancer.billable_days_month || 0).toLocaleString("pt-PT", {maximumFractionDigits: 2})}`,
+        `Salario funcionario/mes: ${money.format(state.employee_salary_monthly || 0)} | Situacao IRS: ${state.employee_marital_status} | Dependentes: ${state.employee_dependents}`,
+        `Coef. IRS Cat. B: ${pct.format(state.freelance_irs_coefficient)} | IRC Empresa: ${pct.format(state.company_irc_rate)} | IVA: ${pct.format(state.vat_rate)}`,
+        `Despesas mensais empresa: ${money.format(data.freelancer.company_expenses_month)} | Despesa isenta: ${money.format(state.exempt_company_expense || 0)}`,
+        ...(autonomousSummary ? [`Trib. autonoma: ${autonomousSummary}`, `Trib. autonoma anual: ${money.format(data.freelancer.autonomous_tax)}`] : []),
+        ...switchLines,
+        "",
+        "Resultados",
+        `Liquido Freelancer/mes: ${money.format(data.freelancer.net_month)} | Diferenca mensal: ${signed(data.freelancer.difference_month)}`,
+        `Liquido anual Freelancer: ${money.format(data.freelancer.net_year)} | Taxa efetiva: ${pct.format(data.freelancer.effective_rate)}`,
+        `Calculo diferenca mensal: ${money.format(data.freelancer.net_month)} + ${money.format(data.freelancer.employee_net_month)} - ${money.format(data.contract.net_month)} = ${signed(data.freelancer.difference_month)}`,
+        "",
+        "Taxa dia informada",
+        "Periodo | Taxa dia | Receita | IVA | SS | IRS | IRC Empresa | Liquido | Diferenca",
+        `Anual   | ${rowText(current)}`,
+        `Mensal  | ${monthText(current)}`,
+        "",
+        "Tabela rapida por taxa dia",
+        "Periodo | Taxa dia | Receita | IVA | SS | IRS | IRC Empresa | Liquido | Diferenca",
+        ...quickLines
+      ].join("\n");
+    }
+
+    document.querySelectorAll(".nav").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".nav").forEach(item => item.classList.toggle("active", item === button));
+        document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === button.dataset.view));
+      });
+    });
+    document.querySelector("#print_screen_button")?.addEventListener("click", () => window.print());
+    document.querySelector("#send_email_button")?.addEventListener("click", sendSimulationByEmail);
+    document.querySelector("#add_autonomous_tax")?.addEventListener("click", () => {
+      state.autonomous_tax_entries = [...autonomousTaxEntries(state), {type: "none", amount: 0}];
+      render();
+    });
+    document.addEventListener("click", event => {
+      const button = event.target.closest("[data-autonomous-remove]");
+      if (!button) return;
+      const index = Number(button.dataset.autonomousRemove);
+      state.autonomous_tax_entries = autonomousTaxEntries(state).filter((_, itemIndex) => itemIndex !== index);
+      if (!state.autonomous_tax_entries.length) state.autonomous_tax_entries = [{type: "none", amount: 0}];
+      render();
+    });
+    document.addEventListener("input", event => {
+      if (event.target.matches("[data-scenario-monthly], [data-quick-rate]")) return;
+      updateFromField(event.target);
+    });
+    document.addEventListener("change", event => updateFromField(event.target));
+    setInputs();
+    render();
+  </script>
+</body>
+</html>

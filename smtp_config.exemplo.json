@@ -1,0 +1,10 @@
+{
+  "SMTP_HOST": "smtp.gmail.com",
+  "SMTP_PORT": "587",
+  "SMTP_USER": "Felipedacosta.rj@gmail.com",
+  "SMTP_PASS": "blyiqvdlhqfheznc",
+
+  "SMTP_FROM": "Felipedacosta.rj@gmail.com",
+  "SMTP_TLS": "true",
+  "SMTP_SSL": "false"
+}

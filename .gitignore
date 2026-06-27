@@ -3,6 +3,7 @@ __pycache__/
 *.log
 teste_*.pdf
 smtp_config.json
+windows-ca-bundle.pem
 server.err
 server.out
 simulador_server.err.log

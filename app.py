@@ -12,6 +12,7 @@ import textwrap
 import unicodedata
 import webbrowser
 from email.message import EmailMessage
+from email.utils import formataddr
 from html import unescape
 from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -134,6 +135,7 @@ def generate_pdf(html: str, text: str = "") -> bytes:
         pdf = generate_browser_pdf(html)
         if pdf:
             return pdf
+        print("PDF visual via Chromium nao foi gerado; usando fallback textual.", flush=True)
     if text:
         return generate_text_pdf_from_text(text)
     return generate_text_pdf(html)
@@ -151,35 +153,54 @@ def generate_browser_pdf(html: str) -> bytes:
         profile_dir = temp_path / "browser-profile"
         html_file.write_text(html, encoding="utf-8")
 
-        command = [
-            browser,
-            "--headless=new",
+        common_args = [
             "--no-sandbox",
             "--disable-setuid-sandbox",
             "--disable-gpu",
             "--disable-gpu-compositing",
             "--disable-gpu-sandbox",
+            "--disable-software-rasterizer",
             "--disable-dev-shm-usage",
             "--disable-extensions",
             "--disable-background-networking",
+            "--disable-crash-reporter",
+            "--disable-sync",
+            "--disable-translate",
             "--disable-features=UseDawn,SkiaGraphite,DawnGraphite,Vulkan,VizDisplayCompositor",
+            "--allow-file-access-from-files",
+            "--hide-scrollbars",
             "--no-first-run",
             "--no-default-browser-check",
+            "--font-render-hinting=none",
             "--run-all-compositor-stages-before-draw",
             "--virtual-time-budget=2500",
+            "--window-size=1600,900",
             f"--user-data-dir={profile_dir}",
             "--print-to-pdf-no-header",
             "--no-pdf-header-footer",
             f"--print-to-pdf={pdf_file}",
             html_file.as_uri(),
         ]
-        try:
-            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=45)
-        except subprocess.TimeoutExpired:
-            return b""
-        if result.returncode != 0 or not pdf_file.exists():
-            return b""
-        return pdf_file.read_bytes()
+        for headless_arg in ("--headless=new", "--headless"):
+            if pdf_file.exists():
+                pdf_file.unlink()
+            command = [browser, headless_arg, *common_args]
+            try:
+                result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+            except subprocess.TimeoutExpired:
+                print(f"Timeout ao gerar PDF com {headless_arg}.", flush=True)
+                continue
+            if result.returncode != 0 or not pdf_file.exists() or pdf_file.stat().st_size < 1024:
+                stderr = result.stderr.decode("utf-8", errors="replace")[:2000]
+                stdout = result.stdout.decode("utf-8", errors="replace")[:1000]
+                print(
+                    f"Falha ao gerar PDF com {headless_arg}. "
+                    f"returncode={result.returncode}; stdout={stdout}; stderr={stderr}",
+                    flush=True,
+                )
+                continue
+            return pdf_file.read_bytes()
+        return b""
 
 
 class PlainTextExtractor(HTMLParser):
@@ -550,6 +571,7 @@ def send_email_with_pdf(recipient: str, pdf: bytes) -> None:
     user = smtp_value(config, "SMTP_USER").strip()
     password = smtp_value(config, "SMTP_PASS")
     sender = smtp_value(config, "SMTP_FROM", user).strip()
+    sender_name = smtp_value(config, "SMTP_FROM_NAME", "Felipe Manso (Consultor Logistico)").strip()
     use_ssl = smtp_value(config, "SMTP_SSL").lower() in {"1", "true", "yes"} or port == 465
     use_tls = smtp_value(config, "SMTP_TLS", "true").lower() not in {"0", "false", "no"}
 
@@ -559,7 +581,7 @@ def send_email_with_pdf(recipient: str, pdf: bytes) -> None:
         )
 
     message = EmailMessage()
-    message["From"] = sender
+    message["From"] = formataddr((sender_name, sender))
     message["To"] = recipient
     message["Subject"] = "Comparação – Contrato vs Freelancer em Portugal"
     message.set_content(

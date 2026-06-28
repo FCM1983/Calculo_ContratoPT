@@ -154,6 +154,8 @@ def generate_browser_pdf(html: str) -> bytes:
         command = [
             browser,
             "--headless=new",
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
             "--disable-gpu",
             "--disable-gpu-compositing",
             "--disable-gpu-sandbox",
@@ -172,7 +174,7 @@ def generate_browser_pdf(html: str) -> bytes:
             html_file.as_uri(),
         ]
         try:
-            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=12)
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=45)
         except subprocess.TimeoutExpired:
             return b""
         if result.returncode != 0 or not pdf_file.exists():

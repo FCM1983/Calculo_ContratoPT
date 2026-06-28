@@ -1,4 +1,5 @@
 __pycache__/
+.firebase/
 *.pyc
 *.log
 teste_*.pdf
